@@ -231,7 +231,7 @@ class TopicDetailsRow extends StatelessWidget {
                   width: 2,
                 ),
                 const Spacer(),
-                Expanded(
+                currentUser.userId == topic.userId ? Expanded(
                   flex: 2,
                   child: Align(
                     alignment: Alignment.topRight,
@@ -250,7 +250,7 @@ class TopicDetailsRow extends StatelessWidget {
                           : const Icon(Icons.check),
                     ),
                   ),
-                ),
+                ) : const SizedBox(),
                 const SizedBox(
                   width: 10,
                 ),
