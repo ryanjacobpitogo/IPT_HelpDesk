@@ -2,27 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:helpdesk_app/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 
+import '../models/user.dart';
 import 'custom_card.dart';
 
 class TopicListWidget extends StatelessWidget {
-  const TopicListWidget({super.key});
+  const TopicListWidget({super.key, required this.isAccount});
 
+  final bool isAccount;
 
   @override
   Widget build(BuildContext context) {
     final cProvider = context.watch<CategoryProvider>();
+    final currentUser = context.select<UserProvider, User?>(
+      (provider) => provider.user,
+    );
     final provider = context.watch<TopicProvider>();
-    final topicList = cProvider.activeCategory
-        ? provider.topicList
-            .where((e) => cProvider.currentCategory.categoryId == e.categoryId)
+    final topicList = isAccount ? provider.topicList
+            .where((e) => currentUser?.userId == e.userId)
             .toList()
-        : provider.topicList;
+            : (provider.filteredTopics.isEmpty ?  (cProvider.activeCategory
+        ? provider.topicList
+            .where((e) => cProvider.currentCategory.categoryId == e.categoryId && cProvider.currentCategory.categoryName != 'All')
+            .toList()
+        : provider.topicList) : provider.filteredTopics);
 
     return topicList.isEmpty
         ? const Center(
             child: Text(
-              'No entries',
-              style: TextStyle(fontSize: 20),
+              'NO ENTRIES',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
             ),
           )
         : ListView.separated(

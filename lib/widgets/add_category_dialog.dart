@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:helpdesk_app/models/categories.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
+import 'package:http/http.dart' as http;
 
+import '../main.dart';
 import '../providers/user_provider.dart';
 
 Future<dynamic> displayAddCategoryDialog(BuildContext context) async {
@@ -38,13 +43,14 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
   @override
   Widget build(BuildContext context) {
     final uProvider = Provider.of<UserProvider>(context);
-    final currentUser = uProvider.currentUser;
+    final currentUser = uProvider.user;
 
     return AlertDialog(
-      title: const Text(
+      title: Text(
         'Add new category',
         style: TextStyle(
           fontWeight: FontWeight.bold,
+          color: Theme.of(context).primaryColor,
           fontSize: 20,
         ),
       ),
@@ -64,17 +70,27 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
             width: double.infinity,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
+                backgroundColor: Theme.of(context).primaryColor,
               ),
               onPressed: () {
                 final categoryName = _categoryNameController.text;
-
+                final categoryId = const Uuid().v4();
                 if (categoryName.isNotEmpty) {
                   final category = Category(
-                    adminId: currentUser.userId,
+                    categoryId: categoryId,
+                    adminId: currentUser!.userId,
                     categoryName: categoryName,
+                    isClicked: false,
                   );
-                  context.read<CategoryProvider>().add(category);
+                  Map<String, String> headers = {
+                    'Content-type': 'application/json',
+                    'Accept': 'application/json',
+                  };
+                  String url = '${Env.urlPrefix}/category/add';
+                   http.post(Uri.parse(url),
+                          headers: headers, body: jsonEncode(category.toJson()));
+                  context.read<CategoryProvider>().fetchCategoryList();
+                  SnackBarService.showSnackBar(content: 'Category \'$categoryName\' created');
                   Navigator.of(context).pop();
                 }
               },

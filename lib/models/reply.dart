@@ -1,20 +1,41 @@
-import 'package:uuid/uuid.dart';
 
 class Reply {
   final String replyId;
   String commentId;
   String userId;
-  String adminId;
+  String username;
   String content;
-  DateTime dateCreated;
+  String dateCreated;
 
   Reply({
+    required this.replyId,
     required this.commentId,
     required this.userId,
-    required this.adminId,
+    this.username = '',
     this.content = '',
     required this.dateCreated,
-  }) : replyId = const Uuid().v4();
+  });
+
+  factory Reply.fromJson(Map<String, dynamic> json) {
+    return Reply(
+      replyId: json['replyId'],
+      commentId: json['commentId'],
+      userId: json['userId'],
+      username: json['username'],
+      content: json['content'],
+      dateCreated: json['dateCreated'],
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'replyId': replyId,
+        'commentId': commentId,
+        'userId': userId,
+        'username': username,
+        'content': content,
+        'dateCreated': dateCreated.toString(),
+      };
+  
 
   @override
   bool operator ==(covariant Reply other) => replyId == other.replyId;
